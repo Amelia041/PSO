@@ -1,22 +1,37 @@
 package config
 
 import (
-	"database/sql"
-	"fmt"
+	"context"
 	"log"
+	"os"
+	"time"
 
-	_ "github.com/lib/pq"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
-var DB *sql.DB
+var DB *mongo.Database
 
 func ConnectDB() {
-	// Sesuaikan dengan kredensial lokal Anda, atau environment variable GCP nanti
-	connStr := "host=localhost port=5432 user=postgres password=root dbname=mahasiswa_app sslmode=disable"
-	var err error
-	DB, err = sql.Open("postgres", connStr)
+
+	uri := os.Getenv("mongodb://pso-17-ci-cd-server:18vPaEDSg89dAYMpG6AfiqjxfyARKod5gLhCdYn8laArcGJMVk9RqLXLo9Wr50bcGoLGgRYlTGsDACDb4hxlFg==@pso-17-ci-cd-server.mongo.cosmos.azure.com:10255/?ssl=true&replicaSet=globaldb&retrywrites=false&maxIdleTimeMS=120000&appName=@pso-17-ci-cd-server@")
+
+	ctx, cancel := context.WithTimeout(
+		context.Background(),
+		10*time.Second,
+	)
+	defer cancel()
+
+	client, err := mongo.Connect(
+		ctx,
+		options.Client().ApplyURI(uri),
+	)
+
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("Database Connected Successfully")
+
+	DB = client.Database("studentsync")
+
+	log.Println("Cosmos MongoDB Connected")
 }
