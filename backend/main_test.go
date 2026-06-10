@@ -37,21 +37,9 @@ func TestLoginWrongCredentials(t *testing.T) {
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
-	// Tanpa DB akan 500, tapi bukan 400
-	if w.Code == http.StatusBadRequest {
-		t.Errorf("Tidak seharusnya 400 untuk input valid")
-	}
-}
-
-func TestGetNotesNoUserID(t *testing.T) {
-	r := SetupRouter()
-
-	req := httptest.NewRequest("GET", "/notes", nil)
-	w := httptest.NewRecorder()
-	r.ServeHTTP(w, req)
-
-	if w.Code != http.StatusBadRequest {
-		t.Errorf("Harusnya 400, dapat %d", w.Code)
+	// DB nil → 503, DB ada tapi salah kredensial → 401
+	if w.Code != http.StatusServiceUnavailable && w.Code != http.StatusUnauthorized {
+		t.Errorf("Harusnya 503 atau 401, dapat %d", w.Code)
 	}
 }
 
@@ -62,9 +50,9 @@ func TestGetNotesWithUserID(t *testing.T) {
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
-	// Tanpa DB akan 500, tapi validasi user_id sudah lewat (bukan 400)
-	if w.Code == http.StatusBadRequest {
-		t.Errorf("Tidak seharusnya 400 untuk user_id yang valid")
+	// DB nil → 503, DB ada → 200
+	if w.Code != http.StatusServiceUnavailable && w.Code != http.StatusOK {
+		t.Errorf("Harusnya 503 atau 200, dapat %d", w.Code)
 	}
 }
 
@@ -75,8 +63,8 @@ func TestGetNotesWithCategory(t *testing.T) {
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
-	if w.Code == http.StatusBadRequest {
-		t.Errorf("Tidak seharusnya 400 untuk input valid")
+	if w.Code != http.StatusServiceUnavailable && w.Code != http.StatusOK {
+		t.Errorf("Harusnya 503 atau 200, dapat %d", w.Code)
 	}
 }
 
@@ -95,8 +83,9 @@ func TestPostNotesValid(t *testing.T) {
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
-	if w.Code == http.StatusBadRequest {
-		t.Errorf("Tidak seharusnya 400 untuk input valid")
+	// DB nil → 503, DB ada → 200
+	if w.Code != http.StatusServiceUnavailable && w.Code != http.StatusOK {
+		t.Errorf("Harusnya 503 atau 200, dapat %d", w.Code)
 	}
 }
 

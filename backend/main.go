@@ -57,6 +57,12 @@ func handleLogin(c *gin.Context) {
 		return
 	}
 
+	// ← tambahkan nil check
+	if config.DB == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Database tidak tersedia"})
+		return
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -69,7 +75,6 @@ func handleLogin(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Username atau password salah"})
 		return
 	}
-
 	c.JSON(http.StatusOK, gin.H{"id": result["_id"], "username": u.Username})
 }
 
@@ -90,6 +95,12 @@ func handlePostNotes(c *gin.Context) {
 		return
 	}
 
+	// ← tambahkan nil check
+	if config.DB == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Database tidak tersedia"})
+		return
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -105,7 +116,6 @@ func handlePostNotes(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal menyimpan data"})
 		return
 	}
-
 	c.JSON(http.StatusOK, gin.H{"status": "saved"})
 }
 
@@ -115,6 +125,12 @@ func handleGetNotes(c *gin.Context) {
 
 	if uid == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "user_id wajib diisi"})
+		return
+	}
+
+	// ← tambahkan nil check
+	if config.DB == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Database tidak tersedia"})
 		return
 	}
 
@@ -146,6 +162,5 @@ func handleGetNotes(c *gin.Context) {
 			"date":     doc["created_at"],
 		})
 	}
-
 	c.JSON(http.StatusOK, notes)
 }
