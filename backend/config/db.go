@@ -13,25 +13,25 @@ import (
 var DB *mongo.Database
 
 func ConnectDB() {
+	uri := os.Getenv("MONGODB_URI")
+	if uri == "" {
+		log.Fatal("MONGODB_URI environment variable is not set")
+	}
 
-	uri := os.Getenv("mongodb://pso-17-ci-cd-server:18vPaEDSg89dAYMpG6AfiqjxfyARKod5gLhCdYn8laArcGJMVk9RqLXLo9Wr50bcGoLGgRYlTGsDACDb4hxlFg==@pso-17-ci-cd-server.mongo.cosmos.azure.com:10255/?ssl=true&replicaSet=globaldb&retrywrites=false&maxIdleTimeMS=120000&appName=@pso-17-ci-cd-server@")
+	// v2: Connect tidak butuh ctx sebagai parameter
+	client, err := mongo.Connect(options.Client().ApplyURI(uri))
+	if err != nil {
+		log.Fatalf("Gagal connect ke MongoDB: %v", err)
+	}
 
-	ctx, cancel := context.WithTimeout(
-		context.Background(),
-		10*time.Second,
-	)
+	// Ping tetap pakai ctx untuk timeout check
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	client, err := mongo.Connect(
-		ctx,
-		options.Client().ApplyURI(uri),
-	)
-
-	if err != nil {
-		log.Fatal(err)
+	if err := client.Ping(ctx, nil); err != nil {
+		log.Fatalf("MongoDB tidak merespon: %v", err)
 	}
 
 	DB = client.Database("studentsync")
-
 	log.Println("Cosmos MongoDB Connected")
 }
