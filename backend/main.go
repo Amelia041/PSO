@@ -148,7 +148,11 @@ func handleGetNotes(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal mengambil data"})
 		return
 	}
-	defer cursor.Close(ctx)
+	defer func() {
+		if err := cursor.Close(ctx); err != nil {
+			log.Printf("Gagal menutup cursor: %v", err)
+		}
+	}()
 
 	notes := []gin.H{}
 	for cursor.Next(ctx) {

@@ -1,24 +1,27 @@
-# .golangci.yml
-run:
-  timeout: 5m
-  
+version: "2"
+
 linters:
   enable:
     - govet        # cek kesalahan logika (bawaan Go)
     - errcheck     # pastikan semua error di-handle
-    - staticcheck  # analisis statis mendalam
-    - gosimple     # saran penyederhanaan kode
+    - staticcheck  # analisis statis mendalam (sudah include gosimple di v2)
     - unused       # deteksi variabel/fungsi tidak dipakai
-    - gofmt        # cek formatting kode
-    - goimports    # cek urutan import
     - gocritic     # saran best practice
 
-linters-settings:
-  errcheck:
-    check-type-assertions: true  # cek type assertion yang tidak di-handle
+  settings:
+    errcheck:
+      check-type-assertions: true
 
-issues:
-  exclude-rules:
-    - path: _test.go             # test file lebih longgar aturannya
-      linters:
-        - errcheck
+  exclusions:
+    rules:
+      - path: _test\.go
+        linters:
+          - errcheck
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+
+run:
+  timeout: 5m
