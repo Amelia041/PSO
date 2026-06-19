@@ -5,6 +5,7 @@ import (
 	"log"
 	"mahasiswa_app/backend/config"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -16,6 +17,7 @@ import (
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
 
+	// ✅ Middleware CORS dulu
 	r.Use(func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
@@ -27,6 +29,13 @@ func SetupRouter() *gin.Engine {
 		c.Next()
 	})
 
+	// ✅ Baru route-route didaftarkan setelah middleware
+	r.GET("/", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"status":  "ok",
+			"message": "StudentSync API is running",
+		})
+	})
 	r.POST("/login", handleLogin)
 	r.POST("/notes", handlePostNotes)
 	r.GET("/notes", handleGetNotes)
@@ -37,8 +46,12 @@ func SetupRouter() *gin.Engine {
 func main() {
 	config.ConnectDB()
 	r := SetupRouter()
-	log.Println("Server berjalan di :8080")
-	if err := r.Run(":8080"); err != nil {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	log.Printf("Server berjalan di :%s", port)
+	if err := r.Run(":" + port); err != nil {
 		log.Fatalf("Server gagal berjalan: %v", err)
 	}
 }
