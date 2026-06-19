@@ -17,7 +17,7 @@ import (
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
 
-	// ✅ Middleware CORS dulu
+	// Middleware CORS
 	r.Use(func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
@@ -28,14 +28,19 @@ func SetupRouter() *gin.Engine {
 		}
 		c.Next()
 	})
-
-	// ✅ Baru route-route didaftarkan setelah middleware
-	r.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"status":  "ok",
-			"message": "StudentSync API is running",
-		})
+	r.GET("/health", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
+
+	// ── Serve Frontend ──────────────────────────────────────────
+	r.StaticFile("/", "./frontend/index.html")
+	r.StaticFile("/dashboard", "./frontend/dashboard.html")
+	r.StaticFile("/add-note", "./frontend/add-note.html")
+	r.StaticFile("/add-schedule", "./frontend/add-schedule.html")
+	r.StaticFile("/groups", "./frontend/groups.html")
+	r.Static("/static", "./frontend") // serve CSS, JS, gambar
+
+	// ── API Routes ──────────────────────────────────────────────
 	r.POST("/login", handleLogin)
 	r.POST("/notes", handlePostNotes)
 	r.GET("/notes", handleGetNotes)

@@ -1,6 +1,6 @@
 // Konfigurasi Mock Data
 const USE_MOCK = true; 
-const API = 'http://localhost:8080';
+const API = window.location.origin;
 
 // Inisialisasi Database Lokal (Mock) di Browser
 if (!localStorage.getItem('mock_notes')) {
