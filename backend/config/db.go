@@ -25,17 +25,18 @@ func ConnectDB() {
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
 
-	// v1: Connect pakai ctx sebagai parameter pertama
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
 	if err != nil {
+		cancel()
 		log.Fatalf("Gagal connect ke MongoDB: %v", err)
 	}
 
 	if err := client.Ping(ctx, nil); err != nil {
+		cancel()
 		log.Fatalf("MongoDB tidak merespon: %v", err)
 	}
+	cancel()
 
 	DB = client.Database("studentsync")
 	log.Println("Cosmos MongoDB Connected")
