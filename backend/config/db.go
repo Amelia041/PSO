@@ -6,8 +6,8 @@ import (
 	"os"
 	"time"
 
-	"go.mongodb.org/mongo-driver/v2/mongo"
-	"go.mongodb.org/mongo-driver/v2/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var DB *mongo.Database
@@ -24,17 +24,18 @@ func ConnectDB() {
 		log.Fatal("MONGODB_URI environment variable is not set")
 	}
 
-	client, err := mongo.Connect(options.Client().ApplyURI(uri))
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// v1: Connect pakai ctx sebagai parameter pertama
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
 	if err != nil {
 		log.Fatalf("Gagal connect ke MongoDB: %v", err)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	if err := client.Ping(ctx, nil); err != nil {
-		cancel()
 		log.Fatalf("MongoDB tidak merespon: %v", err)
 	}
-	cancel()
 
 	DB = client.Database("studentsync")
 	log.Println("Cosmos MongoDB Connected")
