@@ -1,5 +1,5 @@
 // Konfigurasi Mock Data
-const USE_MOCK = true; 
+const USE_MOCK = false;
 const API = window.location.origin;
 
 // Inisialisasi Database Lokal (Mock) di Browser

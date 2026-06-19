@@ -38,7 +38,8 @@ func SetupRouter() *gin.Engine {
 	r.StaticFile("/add-note", "./frontend/add-note.html")
 	r.StaticFile("/add-schedule", "./frontend/add-schedule.html")
 	r.StaticFile("/groups", "./frontend/groups.html")
-	r.Static("/static", "./frontend") // serve CSS, JS, gambar
+	r.StaticFile("/style.css", "./frontend/style.css")
+	r.StaticFile("/script.js", "./frontend/script.js")
 
 	// ── API Routes ──────────────────────────────────────────────
 	r.POST("/login", handleLogin)
