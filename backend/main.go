@@ -34,10 +34,20 @@ func SetupRouter() *gin.Engine {
 
 	// ── Serve Frontend ──────────────────────────────────────────
 	r.StaticFile("/", "./frontend/index.html")
+
+	// Daftarkan dua versi: dengan dan tanpa .html
 	r.StaticFile("/dashboard", "./frontend/dashboard.html")
+	r.StaticFile("/dashboard.html", "./frontend/dashboard.html")
+
 	r.StaticFile("/add-note", "./frontend/add-note.html")
+	r.StaticFile("/add-note.html", "./frontend/add-note.html")
+
 	r.StaticFile("/add-schedule", "./frontend/add-schedule.html")
+	r.StaticFile("/add-schedule.html", "./frontend/add-schedule.html")
+
 	r.StaticFile("/groups", "./frontend/groups.html")
+	r.StaticFile("/groups.html", "./frontend/groups.html")
+
 	r.StaticFile("/style.css", "./frontend/style.css")
 	r.StaticFile("/script.js", "./frontend/script.js")
 
