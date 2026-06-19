@@ -126,6 +126,32 @@
                 </div>
             `;
         }
+        async function doRegister() {
+        const u = document.getElementById('reg-user').value.trim();
+        const p = document.getElementById('reg-pass').value;
+
+        if (!u || !p) {
+            alert("Username dan password wajib diisi!");
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API}/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: u, password: p })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                alert("Registrasi berhasil! Silakan login.");
+                location.reload();
+            } else {
+                alert(data.error || "Registrasi gagal.");
+            }
+        } catch (err) {
+            alert("Gagal terhubung ke server.");
+        }
+    }
     </script>
 </body>
 </html>

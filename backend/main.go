@@ -45,6 +45,7 @@ func SetupRouter() *gin.Engine {
 	r.POST("/login", handleLogin)
 	r.POST("/notes", handlePostNotes)
 	r.GET("/notes", handleGetNotes)
+	r.POST("/register", handleRegister)
 
 	return r
 }
@@ -60,6 +61,51 @@ func main() {
 	if err := r.Run(":" + port); err != nil {
 		log.Fatalf("Server gagal berjalan: %v", err)
 	}
+}
+
+func handleRegister(c *gin.Context) {
+	var u struct {
+		Username string `json:"username"`
+		Password string `json:"password"`
+	}
+	if err := c.ShouldBindJSON(&u); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Request tidak valid"})
+		return
+	}
+	if u.Username == "" || u.Password == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Username dan password wajib diisi"})
+		return
+	}
+	if config.DB == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Database tidak tersedia"})
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// Cek apakah username sudah ada
+	var existing bson.M
+	err := config.DB.Collection("users").FindOne(ctx, bson.M{
+		"username": u.Username,
+	}).Decode(&existing)
+	if err == nil {
+		c.JSON(http.StatusConflict, gin.H{"error": "Username sudah dipakai"})
+		return
+	}
+
+	// Simpan user baru
+	_, err = config.DB.Collection("users").InsertOne(ctx, bson.M{
+		"username":   u.Username,
+		"password":   u.Password, // TODO: ganti bcrypt
+		"created_at": time.Now(),
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal menyimpan user"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Registrasi berhasil"})
 }
 
 func handleLogin(c *gin.Context) {
