@@ -18,7 +18,7 @@ RUN apk --no-cache add ca-certificates tzdata
 WORKDIR /app
 
 COPY --from=builder /app/studentsync .
-COPY --from=builder /app/frontend ./frontend   # ← tambahkan ini
+COPY --from=builder /app/frontend ./frontend  
 
 EXPOSE 8080
 
